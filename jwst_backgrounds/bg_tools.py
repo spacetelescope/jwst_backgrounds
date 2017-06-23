@@ -46,7 +46,7 @@ class background():
     bathtub: 
         Contains the (RA,DEC) background information as a function of calendar day, interpolated at wavelength
     '''
-    def __init__(self, ra, dec, wavelength, thresh=1.21):
+    def __init__(self, ra, dec, wavelength, thresh=1.1):
         # global attributes
         self.cache_url = 'http://www.stsci.edu/~pontoppi/straylight_1.0/sl_cache/' # Path to the online location of the background cache
         self.local_path = os.path.join(os.path.dirname(__file__),'refdata')
@@ -60,7 +60,7 @@ class background():
         self.ra = ra
         self.dec = dec
         self.wavelength = wavelength
-        self.thresh = 1.21
+        self.thresh = thresh
 
         # Load variable content
         self.cache_file = self.myfile_from_healpix(ra, dec)
@@ -200,25 +200,29 @@ class background():
         new_spec = f(new_wave)
         return new_spec
                     
-    def plot_background(self, thisday=-99, fontsize=16, xrange=(0.6,30), yrange=(1e-4,1e4)):
+    def plot_background(self, fontsize=16, xrange=(0.6,30), yrange=(1e-4,1e4), thisday=-99):
+
         wave_array = self.bkg_data['wave_array']
         calendar = self.bkg_data['calendar']
-        
-        plt.clf()
+
+        # Figure out which day to use 
         if thisday not in calendar: 
-            thisday = (np.abs(calendar-np.mean(calendar))).argmin() # plot the middle of the calendar
-            
+            self.thisday = (np.abs(calendar-np.mean(calendar))).argmin() # plot the middle of the calendar
+            print("Plotting background: The input calendar day {}".format(thisday)+" is not available, assuming the middle day: {} instead".format(self.thisday))
+        else:
+            self.thisday = thisday
+                    
         plt.plot(wave_array, self.bkg_data['nonzodi_bg'], label="ISM")
-        plt.plot(wave_array, self.bkg_data['zodi_bg'][thisday, :], label="Zodi")
-        plt.plot(wave_array, self.bkg_data['stray_light_bg'][thisday, :], label="Stray light")
+        plt.plot(wave_array, self.bkg_data['zodi_bg'][self.thisday, :], label="Zodi")
+        plt.plot(wave_array, self.bkg_data['stray_light_bg'][self.thisday, :], label="Stray light")
         plt.plot(wave_array, self.bkg_data['thermal_bg'], label = "Thermal")
-        plt.plot(wave_array, self.bkg_data['total_bg'][thisday, :], label = "Total", color='black', lw=3)
+        plt.plot(wave_array, self.bkg_data['total_bg'][self.thisday, :], label = "Total", color='black', lw=3)
         plt.xlim(xrange)
         plt.ylim(yrange)
         
         plt.xlabel("wavelength (micron)", fontsize=fontsize)
         plt.ylabel("Equivalent in-field radiance (MJy/sr)", fontsize=fontsize)
-        plt.title("Background for calendar day "+str(thisday))
+        plt.title("Background for calendar day "+str(self.thisday))
         plt.legend()
         plt.yscale('log')
         plt.show()
@@ -262,7 +266,7 @@ class background():
     
         plt.show()
         
-    def write2file(self,outfile='background_versus_day.txt'):
+    def write_bathtub(self,outfile='background_versus_day.txt'):
         f = open(outfile,'w')
         header_text = ["# Output of JWST_backgrounds version " + str(__version__) + "\n",
                        "# background cache version " + str(self.cache_version) + '\n',
@@ -270,7 +274,7 @@ class background():
                        "# for RA="+str(self.ra) + ", DEC=" + str(self.dec) + " at wavelength=" + str(self.wavelength) + " micron \n",
                        "# Columns: \n",
                        "# - Calendar day (Jan1=0) \n",
-                       "# - Total background (MegaJanskies per sterradian)\n"] 
+                       "# - Total background (MJy/sr)\n"] 
         for line in header_text:
             f.write(line)               
         
@@ -278,9 +282,42 @@ class background():
             f.write('{0}    {1:5.4f}'.format(calendar_day, self.bathtub['total_thiswave'][i])+'\n')
         
         f.close()
+
+    def write_background(self,outfile='background.txt', thisday=-99):
+        calendar = self.bkg_data['calendar']
+        # Figure out which day to use 
+        if thisday not in calendar: 
+            self.thisday = (np.abs(calendar-np.mean(calendar))).argmin() # plot the middle of the calendar
+            print("Writing background: The input calendar day {}".format(thisday)+" is not available, assuming the middle day: {} instead".format(self.thisday))
+        else:
+            self.thisday = thisday
+
+        f = open(outfile,'w')
+        header_text = ["# Output of JWST_backgrounds version " + str(__version__) + "\n",
+                       "# background cache version " + str(self.cache_version) + '\n',
+                       "\n"
+                       "# for RA="+str(self.ra) + ", DEC=" + str(self.dec) + " On calendar day " + str(self.thisday) + "\n",
+                       "# Columns: \n",
+                       "# - Wavelength [micron] \n",
+                       "# - Total background (MJy/sr)\n", 
+                       "# - In-field zodiacal light (MJy/sr)\n",
+                       "# - In-field galactic light (MJy/sr)\n",
+                       "# - Stray light (MJy/sr)\n", 
+                       "# - Thermal self-emission (MJy/sr)\n"]
+        for line in header_text:
+            f.write(line)               
+        
+        for i,wavelength in enumerate(self.bkg_data['wave_array']):
+            f.write('{0:f}    {1:5.4f}    {2:5.4f}    {3:5.4f}    {4:5.4f}    {5:5.4f}'.format(wavelength, \
+                    self.bkg_data['total_bg'][thisday][i],self.bkg_data['zodi_bg'][thisday][i],self.bkg_data['nonzodi_bg'][i], \
+                    self.bkg_data['stray_light_bg'][thisday][i],self.bkg_data['thermal_bg'][i])+'\n')
+        
+        f.close()
+
             
-def get_background(ra, dec, wavelength, thresh=1.21, plot_background=True, plot_bathtub=True, thisday=-99,
-                   showsubbkgs=False, write_bathtub=True, outfile='background_versus_day.txt'):
+def get_background(ra, dec, wavelength, thresh=1.1, plot_background=True, plot_bathtub=True, thisday=-99,
+                   showsubbkgs=False, write_background=True, write_bathtub=True, background_file='background.txt', 
+                   bathtub_file='background_versus_day.txt'):
     """
     This is the main method, which serves as a wrapper to get the background data and create plots and outputs with one command.
     
@@ -293,7 +330,9 @@ def get_background(ra, dec, wavelength, thresh=1.21, plot_background=True, plot_
     wavelength: float 
         Wavelength at which the bathtub curve is calculated, in micron
     thresh: float
-        the background threshold, relative to the minimum.  Default=1.21, which corresponds to 10% above the minimum background noise.
+        the background threshold, relative to the minimum.  Default=1.1, which corresponds to <5% above the minimum background noise.
+        Note that the actual noise difference will be even smaller, as there are often other significant sources of noise than just the
+        background (source shot noise, detector noise, etc.).
     plot_background: bool 
         whether to plot the background spectrum (and its components) for this day.
     thisday: int
@@ -313,8 +352,15 @@ def get_background(ra, dec, wavelength, thresh=1.21, plot_background=True, plot_
     print("RESULTS:  These coordinates are observable by JWST", len(bkg.bkg_data['calendar']), "days per year.")
     print("RESULTS:  For", bkg.bathtub['good_days'], "of those days, the background is <", thresh, "times the minimum, at wavelength", wavelength, "micron")
     
-    bkg.plot_background()
-    bkg.plot_bathtub()
-    bkg.write2file()
+    if plot_background:
+        bkg.plot_background(thisday=thisday)
 
+    if plot_bathtub:
+        bkg.plot_bathtub(showsubbkgs=showsubbkgs)
     
+    if write_bathtub:
+        bkg.write_bathtub()
+
+    if write_background:
+        bkg.write_background(thisday=thisday)
+        

@@ -16,10 +16,11 @@ Software is provided as-is, with no warranty.
   
 INSTALLATION:
 0) jwst_backgrounds has been tested on regular Anaconda, and AstroConda 0.0.1
-1) Download jwst_backgrounds 
-2) Install it with "python setup.py install --user"
-Note) healpy (version >= 1.10) is required. The setup should install it automatically, but if not, you can try  
-    pip install --user healpy
+1) Install healpy with pip install --user healpy
+2) Download jwst_backgrounds 
+3) Install jwst_bacgrounds with "python setup.py install --user"
+Note) healpy (version >= 1.10) is required. The setup should install it automatically, but a 
+bug in the healpy setup currently prevents this from working. 
    
 RUNNING THE CODE:
 >python			# Start python.
