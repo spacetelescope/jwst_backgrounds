@@ -224,12 +224,14 @@ class background():
             print("Plotting background: The input calendar day {}".format(thisday)+" is not available, assuming the middle day: {} instead".format(self.thisday))
         else:
             self.thisday = thisday
+        thisday_index = np.where(self.thisday == calendar)[0][0]
+            
                     
         plt.plot(wave_array, self.bkg_data['nonzodi_bg'], label="ISM")
-        plt.plot(wave_array, self.bkg_data['zodi_bg'][self.thisday, :], label="Zodi")
-        plt.plot(wave_array, self.bkg_data['stray_light_bg'][self.thisday, :], label="Stray light")
+        plt.plot(wave_array, self.bkg_data['zodi_bg'][thisday_index, :], label="Zodi")
+        plt.plot(wave_array, self.bkg_data['stray_light_bg'][thisday_index, :], label="Stray light")
         plt.plot(wave_array, self.bkg_data['thermal_bg'], label = "Thermal")
-        plt.plot(wave_array, self.bkg_data['total_bg'][self.thisday, :], label = "Total", color='black', lw=3)
+        plt.plot(wave_array, self.bkg_data['total_bg'][thisday_index, :], label = "Total", color='black', lw=3)
         plt.xlim(xrange)
         plt.ylim(yrange)
         
@@ -304,6 +306,7 @@ class background():
             print("Writing background: The input calendar day {}".format(thisday)+" is not available, assuming the middle day: {} instead".format(self.thisday))
         else:
             self.thisday = thisday
+        thisday_index = np.where(self.thisday == calendar)[0][0]
 
         f = open(outfile,'w')
         header_text = ["# Output of JWST_backgrounds version " + str(__version__) + "\n",
@@ -322,8 +325,8 @@ class background():
         
         for i,wavelength in enumerate(self.bkg_data['wave_array']):
             f.write('{0:f}    {1:5.4f}    {2:5.4f}    {3:5.4f}    {4:5.4f}    {5:5.4f}'.format(wavelength, \
-                    self.bkg_data['total_bg'][thisday][i],self.bkg_data['zodi_bg'][thisday][i],self.bkg_data['nonzodi_bg'][i], \
-                    self.bkg_data['stray_light_bg'][thisday][i],self.bkg_data['thermal_bg'][i])+'\n')
+                    self.bkg_data['total_bg'][thisday_index][i],self.bkg_data['zodi_bg'][thisday_index][i],self.bkg_data['nonzodi_bg'][i], \
+                    self.bkg_data['stray_light_bg'][thisday_index][i],self.bkg_data['thermal_bg'][i])+'\n')
         
         f.close()
 
