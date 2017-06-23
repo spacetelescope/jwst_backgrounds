@@ -35,10 +35,16 @@ class background():
     Parameters
     ----------
     ra: float
-    dec: float
-    wavelength: float
+        Right ascension in decimal degrees
+    dec: float 
+        Declination in decimal degrees
+    wavelength: float 
+        Wavelength at which the bathtub curve is calculated, in micron
     thresh: float
-    
+        the background threshold, relative to the minimum.  Default=1.1, which corresponds to <5% above the minimum background noise.
+        Note that the actual noise difference will be even smaller, as there are often other significant sources of noise than just the
+        background (source shot noise, detector noise, etc.).
+        
     Attributes
     ----------
     bkg_data: dict
@@ -54,7 +60,7 @@ class background():
         self.thermal_file = 'thermal_curve_jwst_jrigby_cchen_1.1a.csv' # The constant (not time variable) thermal self-emission curve
         self.nside = 128  # Healpy parameter, from generate_backgroundmodel_cache.c .  
         self.wave_array,self.thermal_bg = self.read_static_data()
-        self.sl_nwave = self.wave_array.size  # should be 108.  Size of wavelength array
+        self.sl_nwave = self.wave_array.size  # Size of wavelength array
         
         # input parameters
         self.ra = ra
@@ -71,16 +77,19 @@ class background():
 
 
     def myfile_from_healpix(self, ra, dec):
-        healpix = healpy.pixelfunc.ang2pix(self.nside, ra, dec, nest=False, lonlat=True)  # old versions of healpy don't have lonlat
+        # old versions of healpy don't have lonlat
+        healpix = healpy.pixelfunc.ang2pix(self.nside, ra, dec, nest=False, lonlat=True)  
         file = str(healpix)[0:4] + "/sl_pix_" + str(healpix) + ".bin"
         return file
 
     def read_static_data(self):
-        abs_wave_file = os.path.join(self.local_path, self.wave_file)  # Standard wavelength array.  Should be SL_NWave=108 long
+        # Standard wavelength array. 
+        abs_wave_file = os.path.join(self.local_path, self.wave_file)  
         wave_array = np.loadtxt(abs_wave_file)    
                 
         thermal = np.genfromtxt(os.path.join(self.local_path, self.thermal_file), delimiter=',')
-        thermal_int = self.interpolate_spec(thermal[:, 0], thermal[:,1],  wave_array, fill=0.0)  # interpolate to same wavelength_array as others.
+        # interpolate to same wavelength_array as others.
+        thermal_int = self.interpolate_spec(thermal[:, 0], thermal[:,1],  wave_array, fill=0.0)  
         
         return wave_array,thermal_int
 
@@ -138,13 +147,13 @@ class background():
         pos = partA[2:5]
         nonzodi_bg = np.array(partA[5:5+self.sl_nwave])
 
-        # Unpack the calendar dates      # code goes from 0 to 365 days.
+        # Unpack the calendar dates - the dates go from 0 to 365 days.
         date_map = np.array(struct.unpack('366i', sbet_data[(5 + self.sl_nwave)*8  : (5 + self.sl_nwave)*8 + size_calendar]))
         if verbose: 
             print("Out of", len(date_map), "days, these many are legal:", np.sum(date_map >=0))
 
         calendar = np.where(date_map >=0)[0]
-        # So, the index dd in zodi_bg[dd, : ]  corresponds to the calendar day lookup[dd]
+
         Ndays = len(calendar) 
         if verbose: 
             print(len(date_map), Ndays)
@@ -155,6 +164,7 @@ class background():
         perday = self.sl_nwave*2
         partB= struct.unpack(str((len(calendar))*self.sl_nwave*2)+'d', sbet_data[perday*Ndays*-8 : ])
 
+        # The index dd in zodi_bg[dd, : ] corresponds to the calendar day lookup[dd]
         for dd in range(0, int(Ndays)):
             br1 = dd*perday
             br2 = br1 + self.sl_nwave
@@ -165,8 +175,9 @@ class background():
         # Expand static background components to the same shape as zodi_bg
         total_bg = np.tile(nonzodi_bg + self.thermal_bg,(Ndays,1)) + stray_light_bg + zodi_bg
 
+        # pack everything up as a dict
         return {'calendar':calendar, 'ra':ra, 'dec':dec, 'pos':pos, 'wave_array':self.wave_array, 'nonzodi_bg':nonzodi_bg, 
-                'thermal_bg':self.thermal_bg, 'zodi_bg':zodi_bg, 'stray_light_bg':stray_light_bg, 'total_bg':total_bg}  #pack it up as a dict
+                'thermal_bg':self.thermal_bg, 'zodi_bg':zodi_bg, 'stray_light_bg':stray_light_bg, 'total_bg':total_bg} 
 
     def make_bathtub(self, wavelength):
         """
@@ -182,6 +193,7 @@ class background():
         self.wavelength = wavelength
         wave_array = self.bkg_data['wave_array']
 
+        # Use linear interpolation to provide the background at any wavelength
         total_thiswave = (interp1d(wave_array, self.bkg_data['total_bg'], bounds_error=True))(wavelength)
         stray_thiswave = (interp1d(wave_array, self.bkg_data['stray_light_bg'], bounds_error=True))(wavelength)
         zodi_thiswave = (interp1d(wave_array, self.bkg_data['zodi_bg'], bounds_error=True))(wavelength)
@@ -196,7 +208,8 @@ class background():
                         'thermal_thiswave':thermal_thiswave,'nonzodi_thiswave':nonzodi_thiswave}
 
     def interpolate_spec(self, wave, specin, new_wave, fill=np.nan):
-        f = interp1d(wave, specin, bounds_error=False, fill_value=fill)  # With these settings, writes NaN to extrapolated regions
+         # With these settings, writes NaN to extrapolated regions
+        f = interp1d(wave, specin, bounds_error=False, fill_value=fill)
         new_spec = f(new_wave)
         return new_spec
                     
