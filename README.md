@@ -10,12 +10,11 @@ For a given target (RA, DEC), and wavelength, it does the following:
   for a given wavelength and a selectable threshold.
   
 This code was written by Jane Rigby, Jane.Rigby@nasa.gov
-The background cache was prepared by Wane Kinzel at STScI.  
+The background cache was prepared by Wayne Kinzel at STScI.  
 Software is provided as-is, with no warranty.
 
   
 INSTALLATION:
-0) jwst_backgrounds has been tested on regular Anaconda, and AstroConda 0.0.1
 1) Install healpy with pip install --user healpy
 2) Download jwst_backgrounds 
 3) Install jwst_bacgrounds with "python setup.py install --user"
@@ -24,10 +23,10 @@ bug in the healpy setup currently prevents this from working.
    
 RUNNING THE CODE:
 >python			# Start python.
-from jwst_backgrounds import bg_tools 	# Import the background module
+>from jwst_backgrounds import bg_tools 	# Import the background module
 
 Below is an example that plots a background curve for a given RA, DEC, wavelength, threshold
-bg_tools.get_background(261.6833333, -73.33222222, 2.15, thresh=1.21, plot_background=True, plot_bathtub=True, write_bathtub=True) 
+>bg_tools.get_background(261.6833333, -73.33222222, 2.15, thresh=1.1, plot_background=True, plot_bathtub=True, write_bathtub=True) 
 
 
 TROUBLESHOOTING:
