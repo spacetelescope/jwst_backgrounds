@@ -1,25 +1,34 @@
 jwst_backgrounds is a a simple program to predict the levels of background emission
 in JWST observations, for use in proposal planning.
 
-It accesses a precompiled background cache prepared by STScI.
+It accesses a precompiled background cache prepared by Space Telescope Science Institute. The background cache is hosted by the 
+Mikulski Archive for Space Telescopes (MAST), so you need internet access to run the tool with the remote cache. It is possible to
+download the full background cache to your local machine. Instructions for downloading the background cache can be found at http://archive.stsci.edu/archive_news/2017/08-Aug/index.html#article1
 
-For a given target (RA, DEC), and wavelength, it does the following:
+For a given target (RA, DEC), and wavelength, jwst_backgrounds does the following:
 - Plot the spectrum of the background for that target on a given calendar day.
 - Plot the total background for that target versus calendar day.
 - Compute the number of days per year that the target is observable at low background,
   for a given wavelength and a selectable threshold.
   
-This code was written by Jane Rigby, Jane.Rigby@nasa.gov
+This code was written by Jane Rigby (GSFC, Jane.Rigby@nasa.gov) and Klaus Pontoppidan (STScI, pontoppi@stsci.edu)
 The background cache was prepared by Wayne Kinzel at STScI.  
-Software is provided as-is, with no warranty.
+
+This software is provided as-is, with no warranty.
 
   
 INSTALLATION:
+Using pip:
+----------
+pip install jwst_backgrounds
+
+Note: healpy (version >= 1.10) is a required dependency, so if you don't have it pip will install it automatically. 
+
+Manually
+----------
 1) Install healpy with pip install --user healpy
-2) Download jwst_backgrounds 
-3) Install jwst_bacgrounds with "python setup.py install --user"
-Note) healpy (version >= 1.10) is required. The setup should install it automatically, but a 
-bug in the healpy setup currently prevents this from working. 
+2) Download jwst_backgrounds from https://github.com/spacetelescope/jwst_backgrounds
+3) Install jwst_backgrounds with "python setup.py install" 
    
 RUNNING THE CODE:
 >python			# Start python.
