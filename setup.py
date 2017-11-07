@@ -1,7 +1,7 @@
 from setuptools import setup
  
 setup(name='jwst_backgrounds',
-      version='1.0',
+      version='1.1',
       description='Retrieve and plot JWST background information',
       author='Jane Rigby (GSFC) and Klaus Pontoppidan (STScI)',
       author_email='Jane.Rigby@nasa.gov',
