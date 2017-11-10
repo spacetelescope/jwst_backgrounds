@@ -124,7 +124,7 @@ class background():
         
         """
 
-        
+        import pdb;pdb.set_trace()
         # Read the background file via http 
         try:
             # Python 3
@@ -137,7 +137,7 @@ class background():
             version_file = urllib.urlopen(self.cache_url + 'VERSION')
             sbet_file = urllib.urlopen(self.cache_url + cache_file)
 
-        self.cache_version = version_file.readlines()[0].decode('utf-8')[:-1]
+        self.cache_versio = version_file.readlines()[0].decode('utf-8')[:-1]
         sbet_data = sbet_file.read()
         
         # Unpack the constant first part
@@ -234,6 +234,7 @@ class background():
                 return
         else:
             self.thisday = thisday
+        import pdb;pdb.set_trace()
         thisday_index = np.where(self.thisday == calendar)[0][0]
             
                     
