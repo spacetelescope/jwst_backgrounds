@@ -24,8 +24,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.interpolate import interp1d
 
-__version__ = 1.0
-
 class background():
     '''
     Main background class. It is initialized with all background data for a specific
@@ -262,8 +260,8 @@ class background():
             
         if showannotate:
             annotation = str(bathtub['good_days']) + " good days out of " + str(calendar.size) + \
-                         " days observable, for thresh " + str(self.thresh)
-            plt.annotate(annotation, (0.05,0.05), xycoords="axes fraction", fontsize=10)
+                         " days observable, for threshold " + str(self.thresh)
+            plt.annotate(annotation, (0.05,0.9), xycoords="axes fraction", fontsize=10)
             plt.ylabel("bkg at " + str(bathtub['wavelength']) + " um (MJy/sr)", fontsize=12)
         else: 
             plt.ylabel("bkg (MJy/SR)", fontsize=fontsize)
