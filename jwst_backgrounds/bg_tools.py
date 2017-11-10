@@ -124,7 +124,6 @@ class background():
         
         """
 
-        import pdb;pdb.set_trace()
         # Read the background file via http 
         try:
             # Python 3
@@ -234,7 +233,6 @@ class background():
                 return
         else:
             self.thisday = thisday
-        import pdb;pdb.set_trace()
         thisday_index = np.where(self.thisday == calendar)[0][0]
             
                     
