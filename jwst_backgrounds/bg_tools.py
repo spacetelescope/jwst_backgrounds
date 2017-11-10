@@ -79,7 +79,9 @@ class background():
     def myfile_from_healpix(self, ra, dec):
         # old versions of healpy don't have lonlat
         healpix = healpy.pixelfunc.ang2pix(self.nside, ra, dec, nest=False, lonlat=True)  
-        file = str(healpix)[0:4] + "/sl_pix_" + str(healpix) + ".bin"
+        # we have to pad with 0s up to 6 characters to the left to match the file name convention
+        healpix_str_pad = str(healpix).zfill(6)
+        file = healpix_str_pad[0:4] + "/sl_pix_" + healpix_str_pad + ".bin" 
         return file
 
     def read_static_data(self):
@@ -222,8 +224,14 @@ class background():
 
         # Figure out which day to use 
         if thisday not in calendar: 
-            self.thisday = (np.abs(calendar-np.mean(calendar))).argmin() # plot the middle of the calendar
-            print("Plotting background: The input calendar day {}".format(thisday)+" is not available, assuming the middle day: {} instead".format(self.thisday))
+            # self.thisday = (np.abs(calendar-np.mean(calendar))).argmin() # plot the middle of the calendar
+            ndays = calendar.size
+            if ndays>0:
+                self.thisday = calendar[int(ndays/2)] # plot the middle of the available dates in the calendar
+                print("Plotting background: The input calendar day {}".format(thisday)+" is not available, assuming the middle day: {} instead".format(self.thisday))
+            else:
+                print("No valid days")
+                return
         else:
             self.thisday = thisday
         thisday_index = np.where(self.thisday == calendar)[0][0]
