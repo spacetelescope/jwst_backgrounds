@@ -1,0 +1,5 @@
+.DS_Store
+*.pyc
+build/
+dist/
+jwst_backgrounds.egg-info
