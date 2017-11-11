@@ -10,6 +10,7 @@ For a given target (RA, DEC), and wavelength, jwst_backgrounds does the followin
 - Plot the total background for that target versus calendar day.
 - Compute the number of days per year that the target is observable at low background,
   for a given wavelength and a selectable threshold.
+- Save the retrieved background data to file.
   
 This code was written by Jane Rigby (GSFC, Jane.Rigby@nasa.gov) and Klaus Pontoppidan (STScI, pontoppi@stsci.edu)
 The background cache was prepared by Wayne Kinzel at STScI, and is the same as used by the JWST Exposure Time Calculator.
