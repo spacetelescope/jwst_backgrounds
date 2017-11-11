@@ -1,15 +1,11 @@
 """
 This is a module to predict the background levels for JWST observations, 
-for use in proposal planning. The code is based on subset of a larger code (JRR_Code/read_JWST_bkg.py),
-written by Jane Rigby, Jane.Rigby@nasa.gov.
+for use in JWST proposal planning. 
 
 It accesses a precompiled background cache prepared by STScI, to do the following:
 - Plot the background versus calendar day.
 - Compute the number of days per year that a target is observable at low background,
   for a given wavelength and a selectable threshold.
-
- 
-The background cache was prepared by Wayne Kinzel (STScI).  
 
 Software is provided as-is, with no warranty. Use the latest versions of APT and ETC to confirm 
 the observability of any JWST targets. 
@@ -23,6 +19,8 @@ import healpy
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.interpolate import interp1d
+
+from jwst_backgrounds.version import __version__
 
 class background():
     '''
@@ -134,7 +132,7 @@ class background():
             version_file = urllib.urlopen(self.cache_url + 'VERSION')
             sbet_file = urllib.urlopen(self.cache_url + cache_file)
 
-        self.cache_versio = version_file.readlines()[0].decode('utf-8')[:-1]
+        self.cache_version = version_file.readlines()[0].decode('utf-8')[:-1]
         sbet_data = sbet_file.read()
         
         # Unpack the constant first part
@@ -214,14 +212,13 @@ class background():
         new_spec = f(new_wave)
         return new_spec
                     
-    def plot_background(self, fontsize=16, xrange=(0.6,30), yrange=(1e-4,1e4), thisday=-99):
+    def plot_background(self, fontsize=16, xrange=(0.6,30), yrange=(1e-4,1e4), thisday=None):
 
         wave_array = self.bkg_data['wave_array']
         calendar = self.bkg_data['calendar']
 
         # Figure out which day to use 
         if thisday not in calendar: 
-            # self.thisday = (np.abs(calendar-np.mean(calendar))).argmin() # plot the middle of the calendar
             ndays = calendar.size
             if ndays>0:
                 self.thisday = calendar[int(ndays/2)] # plot the middle of the available dates in the calendar
@@ -232,7 +229,6 @@ class background():
         else:
             self.thisday = thisday
         thisday_index = np.where(self.thisday == calendar)[0][0]
-            
                     
         plt.plot(wave_array, self.bkg_data['nonzodi_bg'], label="ISM")
         plt.plot(wave_array, self.bkg_data['zodi_bg'][thisday_index, :], label="Zodi")
@@ -261,7 +257,7 @@ class background():
         if showannotate:
             annotation = str(bathtub['good_days']) + " good days out of " + str(calendar.size) + \
                          " days observable, for threshold " + str(self.thresh)
-            plt.annotate(annotation, (0.05,0.9), xycoords="axes fraction", fontsize=10)
+            plt.title(annotation)
             plt.ylabel("bkg at " + str(bathtub['wavelength']) + " um (MJy/sr)", fontsize=12)
         else: 
             plt.ylabel("bkg (MJy/SR)", fontsize=fontsize)
@@ -269,7 +265,7 @@ class background():
         if not label:
             label="Total " + str(bathtub['wavelength']) + " micron"
 
-        if showsubbkgs :
+        if showsubbkgs:
             plt.scatter(calendar, bathtub['zodi_thiswave'], s=20, label="Zodiacal")
             plt.scatter(calendar, bathtub['stray_thiswave'], s=20, label="Stray light")
             plt.scatter(calendar, bathtub['nonzodi_thiswave']*np.ones_like(calendar), s=20, label="ISM+CIB")
@@ -305,15 +301,22 @@ class background():
         
         f.close()
 
-    def write_background(self,outfile='background.txt', thisday=-99):
+    def write_background(self,outfile='background.txt', thisday=None):
         calendar = self.bkg_data['calendar']
-        # Figure out which day to use 
+
+        # Figure out which day to use         
         if thisday not in calendar: 
-            self.thisday = (np.abs(calendar-np.mean(calendar))).argmin() # plot the middle of the calendar
-            print("Writing background: The input calendar day {}".format(thisday)+" is not available, assuming the middle day: {} instead".format(self.thisday))
+            ndays = calendar.size
+            if ndays>0:
+                self.thisday = calendar[int(ndays/2)] # plot the middle of the available dates in the calendar
+            else:
+                print("No valid days")
+                return
         else:
             self.thisday = thisday
         thisday_index = np.where(self.thisday == calendar)[0][0]
+
+        print("Writing background: The input calendar day {}".format(thisday)+" is not available, assuming the middle day: {} instead".format(self.thisday))
 
         f = open(outfile,'w')
         header_text = ["# Output of JWST_backgrounds version " + str(__version__) + "\n",
@@ -338,7 +341,7 @@ class background():
         f.close()
 
             
-def get_background(ra, dec, wavelength, thresh=1.1, plot_background=True, plot_bathtub=True, thisday=-99,
+def get_background(ra, dec, wavelength, thresh=1.1, plot_background=True, plot_bathtub=True, thisday=None,
                    showsubbkgs=False, write_background=True, write_bathtub=True, background_file='background.txt', 
                    bathtub_file='background_versus_day.txt'):
     """
@@ -363,7 +366,7 @@ def get_background(ra, dec, wavelength, thresh=1.1, plot_background=True, plot_b
     plot_days: bool
         whether to show the plot of background at wavelength_input versus calendar days
     showsubbkgs: bool
-        whether to show the components of the background in the plot_days plot.
+        whether to show the components of the background in the bathtub plot.
     write_bathtub: bool
         whether to print the background levels that are plotted in plot_days to an outfile
     outfile:     output filename
