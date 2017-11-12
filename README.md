@@ -21,9 +21,9 @@ This software is provided as-is, with no warranty.
 INSTALLATION:
 Using pip:
 ----------
-'''
+```
 pip install jwst_backgrounds
-'''
+```
 
 Note: healpy (version >= 1.10) is a required dependency, so if you don't have it pip will install it automatically. 
 
@@ -34,15 +34,15 @@ Manually
 3) Install jwst_backgrounds with "python setup.py install" 
    
 RUNNING THE CODE:
-'''
+```
 python			# Start python.
 from jwst_backgrounds import bg_tools 	# Import the background module
-'''
+```
 
 Below is an example that plots a background curve for a given RA, DEC, wavelength, threshold
-'''
+```
 bg_tools.get_background(261.6833333, -73.33222222, 2.15, thresh=1.1, plot_background=True, plot_bathtub=True, write_bathtub=True) 
-'''
+```
 
 TROUBLESHOOTING:
 If matplotlib does not display the images, then try editing your ~/.matplotlib/matplotlibrc file,
