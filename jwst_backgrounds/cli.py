@@ -15,7 +15,7 @@ Help:
 
 """
 
-from jwst_backgrounds import bg_tools
+from jwst_backgrounds import jbt
 from jwst_backgrounds.docopt import docopt
 
 def main():
@@ -27,6 +27,6 @@ def main():
     else:
         thisday = int(opt['--day'])
 
-    bg_tools.get_background(float(opt['<ra>']),float(opt['<dec>']),float(opt['<wavelength>']), \
+    jbt.get_background(float(opt['<ra>']),float(opt['<dec>']),float(opt['<wavelength>']), \
                             thresh=float(opt['--thresh']),thisday=thisday,showsubbkgs=opt['--showsubbkgs'], \
                             background_file=opt['--background_file'],bathtub_file=opt['--bathtub_file'])
