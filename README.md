@@ -41,7 +41,8 @@ from jwst_backgrounds import bg_tools 	# Import the background module
 
 Below is an example that plots a background curve for a given RA, DEC, wavelength, threshold
 ```
-bg_tools.get_background(261.6833333, -73.33222222, 2.15, thresh=1.1, plot_background=True, plot_bathtub=True, write_bathtub=True) 
+bg_tools.get_background(261.6833333, -73.33222222, 2.15, thresh=1.1, \
+                        plot_background=True, plot_bathtub=True, write_bathtub=True) 
 ```
 
 TROUBLESHOOTING:
