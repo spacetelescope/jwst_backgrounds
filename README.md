@@ -47,7 +47,8 @@ bg_tools.get_background(261.6833333, -73.33222222, 2.15, thresh=1.1, plot_backgr
 TROUBLESHOOTING:
 If matplotlib does not display the images, then try editing your ~/.matplotlib/matplotlibrc file,
 and choosing a different backend:  
+```
 backend: MacOSX
 backend: TkAgg
 backend: GTKCairo
-
+```
