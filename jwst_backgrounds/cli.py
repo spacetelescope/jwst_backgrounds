@@ -1,9 +1,9 @@
 """
 Usage: 
-    jwst_backgrounds <ra> <dec> <wavelength> [--thresh=<thresh> --day=<thisday> --showsubbkgs --background_file=<bg_file> --bathtub_file=<tub_file>]
+    jwst_backgrounds [options] <ra> <dec> <wavelength> 
 
 Options:
-    -h --help                     show this help
+    --help                        show this help
     --thresh <float>              threshold factor relative to the minimum background [default: 1.1]
     --day <integer>               which day in the year for which to extract the background 
     --showsubbkgs                 show background components in the bathtub plot
@@ -20,7 +20,7 @@ from jwst_backgrounds.docopt import docopt
 
 def main():
     """Main CLI entrypoint."""
-    opt = docopt(__doc__)
+    opt = docopt(__doc__, options_first=True)
     
     if opt['--day'] is None:
         thisday = None
