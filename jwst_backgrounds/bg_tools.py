@@ -67,7 +67,7 @@ class background():
         # Load variable content
         self.cache_file = self.myfile_from_healpix(ra, dec)
         self.bkg_data = self.read_bkg_data(self.cache_file)
-        
+                
         # Interpolate bathtub curve and package it    
         self.make_bathtub(wavelength)
 
@@ -217,19 +217,12 @@ class background():
         wave_array = self.bkg_data['wave_array']
         calendar = self.bkg_data['calendar']
 
-        # Figure out which day to use 
-        if thisday not in calendar: 
-            ndays = calendar.size
-            if ndays>0:
-                self.thisday = calendar[int(ndays/2)] # plot the middle of the available dates in the calendar
-                print("Plotting background: The input calendar day {}".format(thisday)+" is not available, assuming the middle day: {} instead".format(self.thisday))
-            else:
-                print("No valid days")
-                return
+        if thisday in calendar:
+            thisday_index = np.where(thisday == calendar)[0][0]
         else:
-            self.thisday = thisday
-        thisday_index = np.where(self.thisday == calendar)[0][0]
-                    
+            print("The input calendar day {}".format(thisday)+" is not available")
+            return
+                
         plt.plot(wave_array, self.bkg_data['nonzodi_bg'], label="ISM")
         plt.plot(wave_array, self.bkg_data['zodi_bg'][thisday_index, :], label="Zodi")
         plt.plot(wave_array, self.bkg_data['stray_light_bg'][thisday_index, :], label="Stray light")
@@ -240,7 +233,7 @@ class background():
         
         plt.xlabel("wavelength (micron)", fontsize=fontsize)
         plt.ylabel("Equivalent in-field radiance (MJy/sr)", fontsize=fontsize)
-        plt.title("Background for calendar day "+str(self.thisday))
+        plt.title("Background for calendar day "+str(thisday))
         plt.legend()
         plt.yscale('log')
         plt.show()
@@ -304,25 +297,17 @@ class background():
     def write_background(self,outfile='background.txt', thisday=None):
         calendar = self.bkg_data['calendar']
 
-        # Figure out which day to use         
-        if thisday not in calendar: 
-            ndays = calendar.size
-            if ndays>0:
-                self.thisday = calendar[int(ndays/2)] # plot the middle of the available dates in the calendar
-            else:
-                print("No valid days")
-                return
+        if thisday in calendar:
+            thisday_index = np.where(thisday == calendar)[0][0]
         else:
-            self.thisday = thisday
-        thisday_index = np.where(self.thisday == calendar)[0][0]
-
-        print("Writing background: The input calendar day {}".format(thisday)+" is not available, assuming the middle day: {} instead".format(self.thisday))
+            print("The input calendar day {}".format(thisday)+" is not available")
+            return
 
         f = open(outfile,'w')
         header_text = ["# Output of JWST_backgrounds version " + str(__version__) + "\n",
                        "# background cache version " + str(self.cache_version) + '\n',
                        "\n"
-                       "# for RA="+str(self.ra) + ", DEC=" + str(self.dec) + " On calendar day " + str(self.thisday) + "\n",
+                       "# for RA="+str(self.ra) + ", DEC=" + str(self.dec) + " On calendar day " + str(thisday) + "\n",
                        "# Columns: \n",
                        "# - Wavelength [micron] \n",
                        "# - Total background (MJy/sr)\n", 
@@ -374,19 +359,31 @@ def get_background(ra, dec, wavelength, thresh=1.1, plot_background=True, plot_b
     """
 
     bkg = background(ra,dec,wavelength, thresh=thresh)
+    calendar = bkg.bkg_data['calendar']
     
-    print("RESULTS:  These coordinates are observable by JWST", len(bkg.bkg_data['calendar']), "days per year.")
-    print("RESULTS:  For", bkg.bathtub['good_days'], "of those days, the background is <", thresh, "times the minimum, at wavelength", wavelength, "micron")
+    print("These coordinates are observable by JWST", len(bkg.bkg_data['calendar']), "days per year.")
+    print("For", bkg.bathtub['good_days'], "of those days, the background is <", thresh, "times the minimum, at wavelength", wavelength, "micron")
     
+    # Figure out which day to use for the single-day background 
+    if thisday not in calendar: 
+        ndays = calendar.size
+        if ndays>0:
+            thisday_input = thisday
+            thisday = calendar[int(ndays/2)] # plot the middle of the available dates in the calendar
+            print("Warning: The input calendar day {}".format(thisday_input)+" is not available, assuming the middle day: {} instead".format(thisday))
+        else:
+            print("No valid days")
+            return
+
     if plot_background:
         bkg.plot_background(thisday=thisday)
+    
+    if write_background:
+        bkg.write_background(thisday=thisday)
 
     if plot_bathtub:
         bkg.plot_bathtub(showsubbkgs=showsubbkgs)
     
     if write_bathtub:
         bkg.write_bathtub()
-
-    if write_background:
-        bkg.write_background(thisday=thisday)
         
