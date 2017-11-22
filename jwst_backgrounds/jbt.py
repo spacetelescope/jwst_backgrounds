@@ -242,6 +242,9 @@ class background():
         
         bathtub = self.bathtub # local link
         
+        if not label:
+            label="Total " + str(bathtub['wavelength']) + " micron"
+        
         calendar = self.bkg_data['calendar']
         plt.scatter(calendar, bathtub['total_thiswave'], s=20, label=label)
         plt.xlabel("Day of the year", fontsize=12)
@@ -254,9 +257,6 @@ class background():
             plt.ylabel("bkg at " + str(bathtub['wavelength']) + " um (MJy/sr)", fontsize=12)
         else: 
             plt.ylabel("bkg (MJy/SR)", fontsize=fontsize)
-
-        if not label:
-            label="Total " + str(bathtub['wavelength']) + " micron"
 
         if showsubbkgs:
             plt.scatter(calendar, bathtub['zodi_thiswave'], s=20, label="Zodiacal")
