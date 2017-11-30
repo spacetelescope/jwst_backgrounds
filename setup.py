@@ -10,7 +10,7 @@ setup(name='jwst_backgrounds',
       url='http://jwst.stsci.edu/',
       download_url = 'https://github.com/spacetelescope/jwst_backgrounds/',
       packages=['jwst_backgrounds'],
-      package_data={'jwst_backgrounds': ['refdata/*.csv','refdata/*.txt']},
+      package_data={'jwst_backgrounds': ['refdata/*.csv','refdata/*.txt','agreement/*.pdf']},
       install_requires=['healpy>=1.10'],
       entry_points = {'console_scripts': ['jwst_backgrounds=jwst_backgrounds.cli:main']}
       )
