@@ -277,8 +277,8 @@ class background():
     
         plt.show()
         
-    def write_bathtub(self,outfile='background_versus_day.txt'):
-        f = open(outfile,'w')
+    def write_bathtub(self,bathtub_file='background_versus_day.txt'):
+        f = open(bathtub_file,'w')
         header_text = ["# Output of JWST_backgrounds version " + str(__version__) + "\n",
                        "# background cache version " + str(self.cache_version) + '\n',
                        "\n"
@@ -294,7 +294,7 @@ class background():
         
         f.close()
 
-    def write_background(self,outfile='background.txt', thisday=None):
+    def write_background(self,background_file='background.txt', thisday=None):
         calendar = self.bkg_data['calendar']
 
         if thisday in calendar:
@@ -303,7 +303,7 @@ class background():
             print("The input calendar day {}".format(thisday)+" is not available")
             return
 
-        f = open(outfile,'w')
+        f = open(background_file,'w')
         header_text = ["# Output of JWST_backgrounds version " + str(__version__) + "\n",
                        "# background cache version " + str(self.cache_version) + '\n',
                        "\n"
@@ -353,7 +353,7 @@ def get_background(ra, dec, wavelength, thresh=1.1, plot_background=True, plot_b
     showsubbkgs: bool
         whether to show the components of the background in the bathtub plot.
     write_bathtub: bool
-        whether to print the background levels that are plotted in plot_days to an outfile
+        whether to print the background levels that are plotted in plot_days to an output file
     outfile:     output filename
 
     """
@@ -379,12 +379,12 @@ def get_background(ra, dec, wavelength, thresh=1.1, plot_background=True, plot_b
         bkg.plot_background(thisday=thisday)
     
     if write_background:
-        bkg.write_background(thisday=thisday)
+        bkg.write_background(thisday=thisday, background_file=background_file)
 
     if plot_bathtub:
         bkg.plot_bathtub(showsubbkgs=showsubbkgs)
     
     if write_bathtub:
-        bkg.write_bathtub()
+        bkg.write_bathtub(bathtub_file=bathtub_file)
         
         
