@@ -238,7 +238,9 @@ class background():
         plt.yscale('log')
         plt.show()
 
-    def plot_bathtub(self,showthresh=True, showplot=False, showsubbkgs=False, showannotate=True, title=False, label=False):
+    def plot_bathtub(self,showthresh=True, showplot=False, showsubbkgs=False, showannotate=True, title=False, label=False, showdate=False):
+        
+        from astropy.time import Time
         
         bathtub = self.bathtub # local link
         
@@ -246,9 +248,14 @@ class background():
             label="Total " + str(bathtub['wavelength']) + " micron"
         
         calendar = self.bkg_data['calendar']
-        plt.scatter(calendar, bathtub['total_thiswave'], s=20, label=label)
-        plt.xlabel("Day of the year", fontsize=12)
-        plt.xlim(0,366)
+        
+        if showdate:
+            t = Time(2019.+calendar/365.242, format='decimalyear')
+            tdata = t.datetime
+        else:
+            tdata = calendar
+            
+        plt.scatter(tdata, bathtub['total_thiswave'], s=20, label=label)
             
         if showannotate:
             annotation = str(bathtub['good_days']) + " good days out of " + str(calendar.size) + \
@@ -259,10 +266,10 @@ class background():
             plt.ylabel("bkg (MJy/SR)", fontsize=fontsize)
 
         if showsubbkgs:
-            plt.scatter(calendar, bathtub['zodi_thiswave'], s=20, label="Zodiacal")
-            plt.scatter(calendar, bathtub['stray_thiswave'], s=20, label="Stray light")
-            plt.scatter(calendar, bathtub['nonzodi_thiswave']*np.ones_like(calendar), s=20, label="ISM+CIB")
-            plt.scatter(calendar, bathtub['thermal_thiswave']*np.ones_like(calendar), s=20, label="Thermal")
+            plt.scatter(tdata, bathtub['zodi_thiswave'], s=20, label="Zodiacal")
+            plt.scatter(tdata, bathtub['stray_thiswave'], s=20, label="Stray light")
+            plt.scatter(tdata, bathtub['nonzodi_thiswave']*np.ones_like(calendar), s=20, label="ISM+CIB")
+            plt.scatter(tdata, bathtub['thermal_thiswave']*np.ones_like(calendar), s=20, label="Thermal")
             plt.legend(fontsize=10, frameon=False, labelspacing=0)
             plt.grid()
             plt.locator_params(axis='x', nbins=10)
@@ -270,11 +277,19 @@ class background():
 
         if showthresh: 
             percentiles = (bathtub['themin'], bathtub['themin']*self.thresh)
-            plt.hlines(percentiles, 0, 365, color='black')
+            plt.hlines(percentiles, tdata[0], tdata[-1], color='black')
                     
         if title: 
             plt.title(title)
-    
+        
+        if showdate:
+            plt.xlabel("Date", fontsize=12)
+            plt.gcf().autofmt_xdate()  # orient date labels at a slant
+            plt.xlim(tdata[0],tdata[-1])
+        else:
+            plt.xlabel("Day of the year", fontsize=12)
+            plt.xlim(0,366)
+            
         plt.show()
         
     def write_bathtub(self,bathtub_file='background_versus_day.txt'):
