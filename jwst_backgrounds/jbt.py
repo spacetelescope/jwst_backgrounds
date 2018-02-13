@@ -211,7 +211,20 @@ class background():
         f = interp1d(wave, specin, bounds_error=False, fill_value=fill)
         new_spec = f(new_wave)
         return new_spec
-                    
+    
+    def get_spectrum(self, date='2019-05-01'):
+        from astropy.time import Time
+        
+        wave_array = self.bkg_data['wave_array']
+        
+        t = Time(date)
+        doy = int(t.yday.split(':')[1])
+        if doy-1 in self.bkg_data['calendar']:
+            return wave_array, self.bkg_data['total_bg'][doy-1, :]
+        else:
+            print('Date "{0}" (yday={1}) not available'.format(date, doy))
+            
+            
     def plot_background(self, fontsize=16, xrange=(0.6,30), yrange=(1e-4,1e4), thisday=None):
 
         wave_array = self.bkg_data['wave_array']
