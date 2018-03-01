@@ -20,9 +20,25 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.interpolate import interp1d
 
+import astropy.units as u
+
 from jwst_backgrounds.version import __version__
 
-class background():
+# JWST Imaging / WFSS pixel units
+WFC3IR_PIXEL = u.def_unit('WFC3/IR.pixel', (0.12825*u.arcsec)**2)
+NIRISS_PIXEL = u.def_unit('NIRISS.pixel', (0.065*u.arcsec)**2)
+NIRCAM_SW_PIXEL = u.def_unit('NIRCam.SW.pixel', (0.031*u.arcsec)**2)
+NIRCAM_LW_PIXEL = u.def_unit('NIRCam.LW.pixel', (0.063*u.arcsec)**2)
+MIRI_PIXEL = u.def_unit('MIRI.pixel', (0.11*u.arcsec)**2)
+FLAMBDA_CGS = u.erg/u.second/u.cm**2/u.AA
+FNU_CGS = u.erg/u.second/u.cm**2/u.Hz
+PHOTLAM = u.photon/u.second/u.cm**2/u.AA
+PHOTNU = u.photon/u.second/u.cm**2/u.Hz
+# From Pandeia
+JWST_AREA = u.def_unit('JWST.Primary', 254009.0*u.cm**2)
+HST_AREA = u.def_unit('HST.Primary', 38990.0*u.cm**2)
+
+class JWSTBackground():
     '''
     Main background class. It is initialized with all background data for a specific
     position (RA, DEC). The wavelength at which the bathtub curve is calculated 
@@ -48,7 +64,7 @@ class background():
     bathtub: 
         Contains the (RA,DEC) background information as a function of calendar day, interpolated at wavelength
     '''
-    def __init__(self, ra, dec, wavelength, thresh=1.1):
+    def __init__(self, ra=53.122751, dec=-27.805089, wavelength=2., thresh=1.1):
         # global attributes
         self.cache_url = 'https://archive.stsci.edu/missions/jwst/simulations/straylight/sl_cache/' # Path to the online location of the background cache
         self.local_path = os.path.join(os.path.dirname(__file__),'refdata')
@@ -212,7 +228,7 @@ class background():
         new_spec = f(new_wave)
         return new_spec
     
-    def get_spectrum(self, date='2019-05-01'):
+    def get_spectrum(self, date='2019-05-01', area_unit=u.steradian, flux_unit=u.MJy, wavelength_unit=u.micron):
         from astropy.time import Time
         
         wave_array = self.bkg_data['wave_array']
@@ -220,7 +236,18 @@ class background():
         t = Time(date)
         doy = int(t.yday.split(':')[1])
         if doy-1 in self.bkg_data['calendar']:
-            return wave_array, self.bkg_data['total_bg'][doy-1, :]
+            spw = wave_array*(1*wavelength_unit).unit*u.micron.to(wavelength_unit)
+            
+            try:
+                # Fnu
+                spf_unit = (1*u.MJy).to(flux_unit)/(1*area_unit).unit*(1*area_unit.to(u.steradian))
+            except:
+                # Flam and others need wavelength for conversion
+                spf_unit = (1*u.MJy).to(u.erg/u.second/u.cm**2/u.Hz).to(flux_unit, equivalencies=u.spectral_density(spw))/(1*area_unit).unit*area_unit.to(u.steradian)
+                
+            spf = self.bkg_data['total_bg'][doy-1, :]*spf_unit
+            
+            return spw, spf
         else:
             print('Date "{0}" (yday={1}) not available'.format(date, doy))
             
@@ -384,9 +411,8 @@ def get_background(ra, dec, wavelength, thresh=1.1, plot_background=True, plot_b
         whether to print the background levels that are plotted in plot_days to an output file
     outfile:     output filename
 
-    """
-
-    bkg = background(ra,dec,wavelength, thresh=thresh)
+    """    
+    bkg = JWSTBackground(ra,dec,wavelength, thresh=thresh)
     calendar = bkg.bkg_data['calendar']
     
     print("These coordinates are observable by JWST", len(bkg.bkg_data['calendar']), "days per year.")
