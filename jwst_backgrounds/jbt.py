@@ -34,7 +34,7 @@ FLAMBDA_CGS = u.erg/u.second/u.cm**2/u.AA
 FNU_CGS = u.erg/u.second/u.cm**2/u.Hz
 PHOTLAM = u.photon/u.second/u.cm**2/u.AA
 PHOTNU = u.photon/u.second/u.cm**2/u.Hz
-# From Pandeia
+# From Pandeia, JWST and HST primary area in cm
 JWST_AREA = u.def_unit('JWST.Primary', 254009.0*u.cm**2)
 HST_AREA = u.def_unit('HST.Primary', 38990.0*u.cm**2)
 
