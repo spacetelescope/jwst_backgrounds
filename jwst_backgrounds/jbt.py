@@ -20,9 +20,25 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.interpolate import interp1d
 
+import astropy.units as u
+
 from jwst_backgrounds.version import __version__
 
-class background():
+# JWST Imaging / WFSS pixel units
+WFC3IR_PIXEL = u.def_unit('WFC3/IR.pixel', (0.12825*u.arcsec)**2)
+NIRISS_PIXEL = u.def_unit('NIRISS.pixel', (0.065*u.arcsec)**2)
+NIRCAM_SW_PIXEL = u.def_unit('NIRCam.SW.pixel', (0.031*u.arcsec)**2)
+NIRCAM_LW_PIXEL = u.def_unit('NIRCam.LW.pixel', (0.063*u.arcsec)**2)
+MIRI_PIXEL = u.def_unit('MIRI.pixel', (0.11*u.arcsec)**2)
+FLAMBDA_CGS = u.erg/u.second/u.cm**2/u.AA
+FNU_CGS = u.erg/u.second/u.cm**2/u.Hz
+PHOTLAM = u.photon/u.second/u.cm**2/u.AA
+PHOTNU = u.photon/u.second/u.cm**2/u.Hz
+# From Pandeia, JWST and HST primary area in cm
+JWST_AREA = u.def_unit('JWST.Primary', 254009.0*u.cm**2)
+HST_AREA = u.def_unit('HST.Primary', 38990.0*u.cm**2)
+
+class JWSTBackground():
     '''
     Main background class. It is initialized with all background data for a specific
     position (RA, DEC). The wavelength at which the bathtub curve is calculated 
@@ -48,7 +64,7 @@ class background():
     bathtub: 
         Contains the (RA,DEC) background information as a function of calendar day, interpolated at wavelength
     '''
-    def __init__(self, ra, dec, wavelength, thresh=1.1):
+    def __init__(self, ra=53.122751, dec=-27.805089, wavelength=2., thresh=1.1):
         # global attributes
         self.cache_url = 'https://archive.stsci.edu/missions/jwst/simulations/straylight/sl_cache/' # Path to the online location of the background cache
         self.local_path = os.path.join(os.path.dirname(__file__),'refdata')
@@ -211,7 +227,31 @@ class background():
         f = interp1d(wave, specin, bounds_error=False, fill_value=fill)
         new_spec = f(new_wave)
         return new_spec
-                    
+    
+    def get_spectrum(self, date='2019-05-01', area_unit=u.steradian, flux_unit=u.MJy, wavelength_unit=u.micron):
+        from astropy.time import Time
+        
+        wave_array = self.bkg_data['wave_array']
+        
+        t = Time(date)
+        doy = int(t.yday.split(':')[1])
+        if doy-1 in self.bkg_data['calendar']:
+            spw = wave_array*(1*wavelength_unit).unit*u.micron.to(wavelength_unit)
+            
+            try:
+                # Fnu
+                spf_unit = (1*u.MJy).to(flux_unit)/(1*area_unit).unit*(1*area_unit.to(u.steradian))
+            except:
+                # Flam and others need wavelength for conversion
+                spf_unit = (1*u.MJy).to(u.erg/u.second/u.cm**2/u.Hz).to(flux_unit, equivalencies=u.spectral_density(spw))/(1*area_unit).unit*area_unit.to(u.steradian)
+                
+            spf = self.bkg_data['total_bg'][doy-1, :]*spf_unit
+            
+            return spw, spf
+        else:
+            print('Date "{0}" (yday={1}) not available'.format(date, doy))
+            
+            
     def plot_background(self, fontsize=16, xrange=(0.6,30), yrange=(1e-4,1e4), thisday=None):
 
         wave_array = self.bkg_data['wave_array']
@@ -238,7 +278,9 @@ class background():
         plt.yscale('log')
         plt.show()
 
-    def plot_bathtub(self,showthresh=True, showplot=False, showsubbkgs=False, showannotate=True, title=False, label=False):
+    def plot_bathtub(self,showthresh=True, showplot=False, showsubbkgs=False, showannotate=True, title=False, label=False, showdate=False):
+        
+        from astropy.time import Time
         
         bathtub = self.bathtub # local link
         
@@ -246,9 +288,14 @@ class background():
             label="Total " + str(bathtub['wavelength']) + " micron"
         
         calendar = self.bkg_data['calendar']
-        plt.scatter(calendar, bathtub['total_thiswave'], s=20, label=label)
-        plt.xlabel("Day of the year", fontsize=12)
-        plt.xlim(0,366)
+        
+        if showdate:
+            t = Time(2019.+calendar/365.242, format='decimalyear')
+            tdata = t.datetime
+        else:
+            tdata = calendar
+            
+        plt.scatter(tdata, bathtub['total_thiswave'], s=20, label=label)
             
         if showannotate:
             annotation = str(bathtub['good_days']) + " good days out of " + str(calendar.size) + \
@@ -259,10 +306,10 @@ class background():
             plt.ylabel("bkg (MJy/SR)", fontsize=fontsize)
 
         if showsubbkgs:
-            plt.scatter(calendar, bathtub['zodi_thiswave'], s=20, label="Zodiacal")
-            plt.scatter(calendar, bathtub['stray_thiswave'], s=20, label="Stray light")
-            plt.scatter(calendar, bathtub['nonzodi_thiswave']*np.ones_like(calendar), s=20, label="ISM+CIB")
-            plt.scatter(calendar, bathtub['thermal_thiswave']*np.ones_like(calendar), s=20, label="Thermal")
+            plt.scatter(tdata, bathtub['zodi_thiswave'], s=20, label="Zodiacal")
+            plt.scatter(tdata, bathtub['stray_thiswave'], s=20, label="Stray light")
+            plt.scatter(tdata, bathtub['nonzodi_thiswave']*np.ones_like(calendar), s=20, label="ISM+CIB")
+            plt.scatter(tdata, bathtub['thermal_thiswave']*np.ones_like(calendar), s=20, label="Thermal")
             plt.legend(fontsize=10, frameon=False, labelspacing=0)
             plt.grid()
             plt.locator_params(axis='x', nbins=10)
@@ -270,11 +317,19 @@ class background():
 
         if showthresh: 
             percentiles = (bathtub['themin'], bathtub['themin']*self.thresh)
-            plt.hlines(percentiles, 0, 365, color='black')
+            plt.hlines(percentiles, tdata[0], tdata[-1], color='black')
                     
         if title: 
             plt.title(title)
-    
+        
+        if showdate:
+            plt.xlabel("Date", fontsize=12)
+            plt.gcf().autofmt_xdate()  # orient date labels at a slant
+            plt.xlim(tdata[0],tdata[-1])
+        else:
+            plt.xlabel("Day of the year", fontsize=12)
+            plt.xlim(0,366)
+            
         plt.show()
         
     def write_bathtub(self,bathtub_file='background_versus_day.txt'):
@@ -356,9 +411,8 @@ def get_background(ra, dec, wavelength, thresh=1.1, plot_background=True, plot_b
         whether to print the background levels that are plotted in plot_days to an output file
     outfile:     output filename
 
-    """
-
-    bkg = background(ra,dec,wavelength, thresh=thresh)
+    """    
+    bkg = JWSTBackground(ra,dec,wavelength, thresh=thresh)
     calendar = bkg.bkg_data['calendar']
     
     print("These coordinates are observable by JWST", len(bkg.bkg_data['calendar']), "days per year.")
