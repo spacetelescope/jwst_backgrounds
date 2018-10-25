@@ -18,7 +18,8 @@ The background cache was prepared by Wayne Kinzel at STScI, and is the same as u
 This software is provided as-is, with no warranty.
 
   
-INSTALLATION:
+INSTALLATION
+
 Using pip:
 ----------
 ```
@@ -32,6 +33,15 @@ Manually
 1) Install healpy with pip install --user healpy
 2) Download jwst_backgrounds from https://github.com/spacetelescope/jwst_backgrounds
 3) Install jwst_backgrounds with "python setup.py install" 
+
+Note that some people have had trouble installing healpy with pip. An alternate way to get healpy is using conda:
+
+```
+conda config --add channels conda-forge
+conda install healpy
+pip install jwst_backgrounds
+```
+
    
 RUNNING THE CODE:
 ```
@@ -46,6 +56,7 @@ jbt.get_background(261.6833333, -73.33222222, 2.15, thresh=1.1, \
 ```
 
 TROUBLESHOOTING:
+-----------
 If matplotlib does not display the images, then try editing your ~/.matplotlib/matplotlibrc file,
 and choosing a different backend:  
 ```
@@ -53,3 +64,4 @@ backend: MacOSX
 backend: TkAgg
 backend: GTKCairo
 ```
+
