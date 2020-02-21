@@ -28,18 +28,28 @@ pip install jwst_backgrounds
 
 Note: healpy (version >= 1.10) is a required dependency, so if you don't have it pip will install it automatically. 
 
-Manually
-----------
-1) Install healpy with pip install --user healpy
-2) Download jwst_backgrounds from https://github.com/spacetelescope/jwst_backgrounds
-3) Install jwst_backgrounds with "python setup.py install" 
+Note: to upgrade the JBT with pip use `pip install jwst_background --upgrade`
 
-Note that some people have had trouble installing healpy with pip. An alternate way to get healpy is using conda:
+Using Conda
+-----------
+First clone the repository
 
 ```
-conda config --add channels conda-forge
-conda install healpy
-pip install jwst_backgrounds
+git clone git@github.com:spacetelescope/jwst_backgrounds.git
+cd jwst_backgrounds
+conda create --name <env> --file requirements.txt
+```
+
+where `<env>` is the name of the environment you wish to create and requirements is the `requirements.txt` in the package directory.
+
+Manually
+----------
+Clone the repository from github and install using `easy_install`.
+
+```
+git clone git@github.com:spacetelescope/jwst_backgrounds.git
+cd jwst_backgrounds
+easy_install .
 ```
 
    
