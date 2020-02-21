@@ -41,6 +41,11 @@ conda create --name <env> --file requirements.txt
 ```
 
 where `<env>` is the name of the environment you wish to create and requirements is the `requirements.txt` in the package directory.
+To activate your JBT enter the following command:
+
+```
+source activate <env>
+```
 
 Manually
 ----------
