@@ -16,8 +16,9 @@ install:
   - conda info -a
 
   # Replace dep1 dep2 ... with your dependencies
-  - conda create --name jwst_bgt python=$TRAVIS_PYTHON_VERSION --file requirements.txt
-  - conda activate jwst-bgt
+  - ls *
+  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION --file requirements.txt
+  - conda activate test-environment
   - python setup.py install
 script:
   - pytest
