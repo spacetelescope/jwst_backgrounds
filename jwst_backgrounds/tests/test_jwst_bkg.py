@@ -2,7 +2,7 @@ from astropy.io import ascii
 from astropy.table import Table
 import numpy as np
 
-from jwst_backgrounds.jbt import background 
+from jwst_backgrounds.jbt import background
 
 
 def test_backgrounds(thisday=100):
@@ -21,10 +21,10 @@ def test_backgrounds(thisday=100):
 
     data = []
 
-    for i,wavelength in enumerate(bkg.bkg_data['wave_array']):
-        data.append([wavelength, bkg.bkg_data['total_bg'][thisday_index][i], 
-                    bkg.bkg_data['zodi_bg'][thisday_index][i],bkg.bkg_data['nonzodi_bg'][i],
-                    bkg.bkg_data['stray_light_bg'][thisday_index][i],bkg.bkg_data['thermal_bg'][i]])
+    for i, wavelength in enumerate(bkg.bkg_data['wave_array']):
+        data.append([wavelength, bkg.bkg_data['total_bg'][thisday_index][i],
+                    bkg.bkg_data['zodi_bg'][thisday_index][i], bkg.bkg_data['nonzodi_bg'][i],
+                    bkg.bkg_data['stray_light_bg'][thisday_index][i], bkg.bkg_data['thermal_bg'][i]])
 
     # Build background output table
     test_data = Table(rows=data, names=column_names)
