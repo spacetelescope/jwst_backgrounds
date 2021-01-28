@@ -12,9 +12,9 @@ setup(name='jwst_backgrounds',
       packages=['jwst_backgrounds'],
       package_data={'jwst_backgrounds': ['refdata/*.csv','refdata/*.txt','agreement/*.pdf']},
       install_requires=['healpy>=1.10',
-                        'matplotlib==3.1.1',
-                        'numpy==1.17.0',
-                        'scipy==1.1.0'],
+                        'matplotlib>=3.1.1',
+                        'numpy>=1.17.0',
+                        'scipy>=1.1.0'],
       entry_points = {'console_scripts': ['jwst_backgrounds=jwst_backgrounds.cli:main']}
       )
 
