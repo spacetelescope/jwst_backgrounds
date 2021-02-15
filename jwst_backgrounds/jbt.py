@@ -165,7 +165,7 @@ class background():
 
         # The index dd in zodi_bg[dd, : ] corresponds to the calendar day lookup[dd]
         for dd in range(0, int(Ndays)):
-            br1 = dd*perday
+            br1 = dd * perday
             br2 = br1 + self.sl_nwave
             br3 = br2 + self.sl_nwave
             zodi_bg[dd, ] = partB[br1:br2]
