@@ -137,17 +137,17 @@ class background():
 
         # Unpack the constant first part
         if verbose:
-            print("File has", len(sbet_data), "bytes, which is", len(sbet_data)/8., "doubles")
+            print("File has", len(sbet_data), "bytes, which is", len(sbet_data) / 8., "doubles")
 
         size_calendar = struct.calcsize("366i")  # bytes, not doubles
-        partA = struct.unpack(str(5 + self.sl_nwave)+'d', sbet_data[0: (5 + self.sl_nwave)*8])
+        partA = struct.unpack(str(5 + self.sl_nwave) + 'd', sbet_data[0: (5 + self.sl_nwave) * 8])
         ra = partA[0]
         dec = partA[1]
         pos = partA[2:5]
-        nonzodi_bg = np.array(partA[5:5+self.sl_nwave])
+        nonzodi_bg = np.array(partA[5:5 + self.sl_nwave])
 
         # Unpack the calendar dates - the dates go from 0 to 365 days.
-        date_map = np.array(struct.unpack('366i', sbet_data[(5 + self.sl_nwave)*8: (5 + self.sl_nwave)*8 + size_calendar]))
+        date_map = np.array(struct.unpack('366i', sbet_data[(5 + self.sl_nwave) * 8: (5 + self.sl_nwave) * 8 + size_calendar]))
         if verbose:
             print("Out of", len(date_map), "days, these many are legal:", np.sum(date_map >= 0))
 
@@ -160,8 +160,8 @@ class background():
         # Unpack part B, the time-variable part
         zodi_bg = np.zeros((Ndays, self.sl_nwave))
         stray_light_bg = np.zeros((Ndays, self.sl_nwave))
-        perday = self.sl_nwave*2
-        partB= struct.unpack(str((len(calendar))*self.sl_nwave*2) + 'd', sbet_data[perday*Ndays*-8:])
+        perday = self.sl_nwave * 2
+        partB= struct.unpack(str((len(calendar)) * self.sl_nwave * 2) + 'd', sbet_data[perday * Ndays * -8:])
 
         # The index dd in zodi_bg[dd, : ] corresponds to the calendar day lookup[dd]
         for dd in range(0, int(Ndays)):
@@ -200,7 +200,7 @@ class background():
         nonzodi_thiswave = (interp1d(wave_array, self.bkg_data['nonzodi_bg'], bounds_error=True))(wavelength)
 
         themin = np.min(total_thiswave)
-        good_days = int(np.sum(total_thiswave < themin*self.thresh)*1.0)
+        good_days = int(np.sum(total_thiswave < themin * self.thresh) * 1.0)
 
         self.bathtub = {'wavelength': wavelength, 'themin': themin, 'good_days': good_days,
                         'total_thiswave': total_thiswave, 'stray_thiswave': stray_thiswave, 'zodi_thiswave': zodi_thiswave,
@@ -219,7 +219,7 @@ class background():
         if thisday in calendar:
             thisday_index = np.where(thisday == calendar)[0][0]
         else:
-            print("The input calendar day {}".format(thisday)+" is not available")
+            print("The input calendar day {}".format(thisday) + " is not available")
             return
 
         plt.plot(wave_array, self.bkg_data['nonzodi_bg'], label="ISM")
@@ -232,7 +232,7 @@ class background():
 
         plt.xlabel("wavelength (micron)", fontsize=fontsize)
         plt.ylabel("Equivalent in-field radiance (MJy/sr)", fontsize=fontsize)
-        plt.title("Background for calendar day "+str(thisday))
+        plt.title("Background for calendar day " + str(thisday))
         plt.legend()
         plt.yscale('log')
         plt.show()
@@ -260,15 +260,15 @@ class background():
         if showsubbkgs:
             plt.scatter(calendar, bathtub['zodi_thiswave'], s=20, label="Zodiacal")
             plt.scatter(calendar, bathtub['stray_thiswave'], s=20, label="Stray light")
-            plt.scatter(calendar, bathtub['nonzodi_thiswave']*np.ones_like(calendar), s=20, label="ISM+CIB")
-            plt.scatter(calendar, bathtub['thermal_thiswave']*np.ones_like(calendar), s=20, label="Thermal")
+            plt.scatter(calendar, bathtub['nonzodi_thiswave'] * np.ones_like(calendar), s=20, label="ISM+CIB")
+            plt.scatter(calendar, bathtub['thermal_thiswave'] * np.ones_like(calendar), s=20, label="Thermal")
             plt.legend(fontsize=10, frameon=False, labelspacing=0)
             plt.grid()
             plt.locator_params(axis='x', nbins=10)
             plt.locator_params(axis='y', nbins=10)
 
         if showthresh:
-            percentiles = (bathtub['themin'], bathtub['themin']*self.thresh)
+            percentiles = (bathtub['themin'], bathtub['themin'] * self.thresh)
             plt.hlines(percentiles, 0, 365, color='black')
 
         if title:
@@ -281,7 +281,7 @@ class background():
         header_text = ["# Output of JWST_backgrounds version " + str(__version__) + "\n",
                        "# background cache version " + str(self.cache_version) + '\n',
                        "\n"
-                       "# for RA="+str(self.ra) + ", DEC=" + str(self.dec) + " at wavelength=" + str(self.wavelength) + " micron \n",
+                       "# for RA=" + str(self.ra) + ", DEC=" + str(self.dec) + " at wavelength=" + str(self.wavelength) + " micron \n",
                        "# Columns: \n",
                        "# - Calendar day (Jan1=0) \n",
                        "# - Total background (MJy/sr)\n"]
@@ -289,7 +289,7 @@ class background():
             f.write(line)
 
         for i, calendar_day in enumerate(self.bkg_data['calendar']):
-            f.write('{0}    {1:5.4f}'.format(calendar_day, self.bathtub['total_thiswave'][i])+'\n')
+            f.write('{0}    {1:5.4f}'.format(calendar_day, self.bathtub['total_thiswave'][i]) + '\n')
 
         f.close()
 
@@ -299,14 +299,14 @@ class background():
         if thisday in calendar:
             thisday_index = np.where(thisday == calendar)[0][0]
         else:
-            print("The input calendar day {}".format(thisday)+" is not available")
+            print("The input calendar day {}".format(thisday) + " is not available")
             return
 
         f = open(background_file, 'w')
         header_text = ["# Output of JWST_backgrounds version " + str(__version__) + "\n",
                        "# background cache version " + str(self.cache_version) + '\n',
                        "\n"
-                       "# for RA="+str(self.ra) + ", DEC=" + str(self.dec) + " On calendar day " + str(thisday) + "\n",
+                       "# for RA=" + str(self.ra) + ", DEC=" + str(self.dec) + " On calendar day " + str(thisday) + "\n",
                        "# Columns: \n",
                        "# - Wavelength [micron] \n",
                        "# - Total background (MJy/sr)\n",
@@ -320,7 +320,7 @@ class background():
         for i, wavelength in enumerate(self.bkg_data['wave_array']):
             f.write('{0:f}    {1:5.4f}    {2:5.4f}    {3:5.4f}    {4:5.4f}    {5:5.4f}'.format(wavelength,
                     self.bkg_data['total_bg'][thisday_index][i], self.bkg_data['zodi_bg'][thisday_index][i], self.bkg_data['nonzodi_bg'][i],
-                    self.bkg_data['stray_light_bg'][thisday_index][i], self.bkg_data['thermal_bg'][i])+'\n')
+                    self.bkg_data['stray_light_bg'][thisday_index][i], self.bkg_data['thermal_bg'][i]) + '\n')
 
         f.close()
 
@@ -368,8 +368,8 @@ def get_background(ra, dec, wavelength, thresh=1.1, plot_background=True, plot_b
         ndays = calendar.size
         if ndays > 0:
             thisday_input = thisday
-            thisday = calendar[int(ndays/2)]  # plot the middle of the available dates in the calendar
-            print("Warning: The input calendar day {}".format(thisday_input)+" is not available, assuming the middle day: {} instead".format(thisday))
+            thisday = calendar[int(ndays / 2)]  # plot the middle of the available dates in the calendar
+            print("Warning: The input calendar day {}".format(thisday_input) + " is not available, assuming the middle day: {} instead".format(thisday))
         else:
             print("No valid days")
             return
