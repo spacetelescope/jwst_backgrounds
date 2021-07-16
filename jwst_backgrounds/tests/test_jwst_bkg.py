@@ -1,9 +1,13 @@
+from os.path import abspath, dirname, join
+
 from astropy.io import ascii
 from astropy.table import Table
 import numpy as np
 
 from jwst_backgrounds.jbt import background
 
+
+TEST_DIR = abspath(join(dirname(__file__)))
 
 def test_backgrounds(thisday=100):
     """ Test backgrounds output from github example."""
@@ -12,7 +16,8 @@ def test_backgrounds(thisday=100):
     column_names = ['wavelenght', 'total_background', 'zodical_background', 'nonzodical_background',
                     'stray_light_background', 'thermal_background']
     # Read truth files
-    truth = ascii.read('background.txt', names=column_names)
+    data_file = join(TEST_DIR, 'background.txt')
+    truth = ascii.read(data_file, names=column_names)
 
     # Run background calculation
     bkg = background(261.6833333, -73.33222222, 2.15, thresh=1.1)
