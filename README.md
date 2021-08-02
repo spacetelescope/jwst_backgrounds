@@ -85,3 +85,7 @@ backend: TkAgg
 backend: GTKCairo
 ```
 
+Citation
+--------
+This code was written by Jane Rigby (GSFC, Jane.Rigby@nasa.gov) and Klaus Pontoppidan (STScI, pontoppi@stsci.edu) The background cache was prepared by Wayne Kinzel at STScI, and is the same as used by the JWST Exposure Time Calculator.
+
