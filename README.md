@@ -70,6 +70,11 @@ jbt.get_background(261.6833333, -73.33222222, 2.15, thresh=1.1, \
                         plot_background=True, plot_bathtub=True, write_bathtub=True) 
 ```
 
+Contributing
+--------------
+`jwst_backgrounds` follows the STScI ["forking workflow"](https://github.com/spacetelescope/style-guides/blob/master/guides/git-workflow.md#forking-workflow).
+
+
 TROUBLESHOOTING:
 -----------
 If matplotlib does not display the images, then try editing your ~/.matplotlib/matplotlibrc file,
@@ -79,4 +84,8 @@ backend: MacOSX
 backend: TkAgg
 backend: GTKCairo
 ```
+
+Citation
+--------
+This code was written by Jane Rigby (GSFC, Jane.Rigby@nasa.gov) and Klaus Pontoppidan (STScI, pontoppi@stsci.edu) The background cache was prepared by Wayne Kinzel at STScI, and is the same as used by the JWST Exposure Time Calculator.
 
