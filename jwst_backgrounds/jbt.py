@@ -81,6 +81,19 @@ class background():
         return file
 
     def read_static_data(self):
+        """Read static data from backgrounds package
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        wave_array : np.array
+            Wavelength data
+        thermal_int : np.array
+            Interpolated thermal data
+        """
         # Standard wavelength array.
         abs_wave_file = os.path.join(self.local_path, self.wave_file)
         wave_array = np.loadtxt(abs_wave_file)
@@ -207,12 +220,42 @@ class background():
                         'thermal_thiswave': thermal_thiswave, 'nonzodi_thiswave': nonzodi_thiswave}
 
     def interpolate_spec(self, wave, specin, new_wave, fill=np.nan):
+        """Interpolate spectral data
+
+        Parameters
+        ----------
+        wave : np.array
+
+        specin : np.array
+
+        new_wave : np.array
+
+        fill : obj
+
+        Returns
+        -------
+        new_spec : np.array
+            Interpolated spectrum
+        """
         # With these settings, writes NaN to extrapolated regions
         f = interp1d(wave, specin, bounds_error=False, fill_value=fill)
         new_spec = f(new_wave)
         return new_spec
 
     def plot_background(self, fontsize=16, xrange=(0.6, 30), yrange=(1e-4, 1e4), thisday=None):
+        """Plot background data
+
+        Parameters
+        ----------
+        fontsize : int
+            Fontsize for axes and titles
+        xrange : tuple
+            minimum and maximum range for x axis
+        yrange : tuple
+            minimum and maximum value for y axis
+        thisday : int
+            The day of the year to plot
+        """
         wave_array = self.bkg_data['wave_array']
         calendar = self.bkg_data['calendar']
 
@@ -238,7 +281,22 @@ class background():
         plt.show()
 
     def plot_bathtub(self, showthresh=True, showplot=False, showsubbkgs=False, showannotate=True, title=False, label=False):
+        """Create background bathtub plot.
 
+        Parameters
+        ----------
+        showthresh : bool
+
+        showplot : bool
+
+        showsubbkgs : bool
+
+        showannotate : bool
+
+        title : bool
+
+        label : bool
+        """
         bathtub = self.bathtub  # local link
 
         if not label:
@@ -277,6 +335,13 @@ class background():
         plt.show()
 
     def write_bathtub(self, bathtub_file='background_versus_day.txt'):
+        """Write out bathtub distribution data
+
+        Parameters
+        ----------
+        bathtub_file : str
+            Output text file name
+        """
         f = open(bathtub_file, 'w')
         header_text = ["# Output of JWST_backgrounds version " + str(__version__) + "\n",
                        "# background cache version " + str(self.cache_version) + '\n',
@@ -294,6 +359,11 @@ class background():
         f.close()
 
     def write_background(self, background_file='background.txt', thisday=None):
+        """Write out backgrounds data to text file.
+
+        background_file : str
+            Output text file name
+        """
         calendar = self.bkg_data['calendar']
 
         if thisday in calendar:
