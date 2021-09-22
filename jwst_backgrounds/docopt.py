@@ -30,14 +30,17 @@ class DocoptExit(SystemExit):
 
 
 class Pattern(object):
-
+    """Class needs docstring"""
     def __eq__(self, other):
+        """Method needs docstring"""
         return repr(self) == repr(other)
 
     def __hash__(self):
+        """Method needs docstring"""
         return hash(repr(self))
 
     def fix(self):
+        """Method needs docstring"""
         self.fix_identities()
         self.fix_repeating_arguments()
         return self
@@ -111,12 +114,15 @@ class ChildPattern(Pattern):
         self.value = value
 
     def __repr__(self):
+        """Method needs docstring"""
         return '%s(%r, %r)' % (self.__class__.__name__, self.name, self.value)
 
     def flat(self, *types):
+        """Method needs docstring"""
         return [self] if not types or type(self) in types else []
 
     def match(self, left, collected=None):
+        """Method needs docstring"""
         collected = [] if collected is None else collected
         pos, match = self.single_match(left)
         if match is None:
@@ -138,23 +144,26 @@ class ChildPattern(Pattern):
 
 
 class ParentPattern(Pattern):
-
+    """Class needs docstring"""
     def __init__(self, *children):
         self.children = list(children)
 
     def __repr__(self):
+        """Method needs docstring"""
         return '%s(%s)' % (self.__class__.__name__,
                            ', '.join(repr(a) for a in self.children))
 
     def flat(self, *types):
+        """Method needs docstring"""
         if type(self) in types:
             return [self]
         return sum([c.flat(*types) for c in self.children], [])
 
 
 class Argument(ChildPattern):
-
+    """Class needs docstring"""
     def single_match(self, left):
+        """Method needs docstring"""
         for n, p in enumerate(left):
             if type(p) is Argument:
                 return n, Argument(self.name, p.value)
@@ -162,18 +171,20 @@ class Argument(ChildPattern):
 
     @classmethod
     def parse(class_, source):
+        """Method needs docstring"""
         name = re.findall('(<\S*?>)', source)[0]
         value = re.findall('\[default: (.*)\]', source, flags=re.I)
         return class_(name, value[0] if value else None)
 
 
 class Command(Argument):
-
+    """Class needs docstring"""
     def __init__(self, name, value=False):
         self.name = name
         self.value = value
 
     def single_match(self, left):
+        """Method needs docstring"""
         for n, p in enumerate(left):
             if type(p) is Argument:
                 if p.value == self.name:
@@ -184,7 +195,7 @@ class Command(Argument):
 
 
 class Option(ChildPattern):
-
+    """Class needs docstring"""
     def __init__(self, short=None, long=None, argcount=0, value=False):
         assert argcount in (0, 1)
         self.short, self.long = short, long
@@ -193,6 +204,7 @@ class Option(ChildPattern):
 
     @classmethod
     def parse(class_, option_description):
+        """Method needs docstring"""
         short, long, argcount, value = None, None, 0, False
         options, _, description = option_description.strip().partition('  ')
         options = options.replace(',', ' ').replace('=', ' ')
@@ -209,6 +221,7 @@ class Option(ChildPattern):
         return class_(short, long, argcount, value)
 
     def single_match(self, left):
+        """Method needs docstring"""
         for n, p in enumerate(left):
             if self.name == p.name:
                 return n, p
@@ -216,6 +229,7 @@ class Option(ChildPattern):
 
     @property
     def name(self):
+        """Method needs docstring"""
         return self.long or self.short
 
     def __repr__(self):
@@ -224,8 +238,9 @@ class Option(ChildPattern):
 
 
 class Required(ParentPattern):
-
+    """Class needs docstring"""
     def match(self, left, collected=None):
+        """Method needs docstring"""
         collected = [] if collected is None else collected
         l = left
         c = collected
@@ -237,8 +252,9 @@ class Required(ParentPattern):
 
 
 class Optional(ParentPattern):
-
+    """Class needs docstring"""
     def match(self, left, collected=None):
+        """Method needs docstring"""
         collected = [] if collected is None else collected
         for p in self.children:
             m, left, collected = p.match(left, collected)
@@ -251,8 +267,9 @@ class AnyOptions(Optional):
 
 
 class OneOrMore(ParentPattern):
-
+    """Class needs docstring"""
     def match(self, left, collected=None):
+        """Method needs docstring"""
         assert len(self.children) == 1
         collected = [] if collected is None else collected
         l = left
@@ -273,8 +290,9 @@ class OneOrMore(ParentPattern):
 
 
 class Either(ParentPattern):
-
+    """Class needs docsting"""
     def match(self, left, collected=None):
+        """Method needs docstring"""
         collected = [] if collected is None else collected
         outcomes = []
         for p in self.children:
@@ -293,9 +311,11 @@ class TokenStream(list):
         self.error = error
 
     def move(self):
+        """Method needs docstring"""
         return self.pop(0) if len(self) else None
 
     def current(self):
+        """Method needs docstring"""
         return self[0] if len(self) else None
 
 
@@ -368,6 +388,7 @@ def parse_shorts(tokens, options):
 
 
 def parse_pattern(source, options):
+    """Function needs docstring"""
     tokens = TokenStream(re.sub(r'([\[\]\(\)\|]|\.\.\.)', r' \1 ', source),
                          DocoptLanguageError)
     result = parse_expr(tokens, options)
@@ -377,6 +398,7 @@ def parse_pattern(source, options):
 
 
 def parse_expr(tokens, options):
+    """Function needs docstring"""
     """expr ::= seq ( '|' seq )* ;"""
     seq = parse_seq(tokens, options)
     if tokens.current() != '|':
@@ -390,6 +412,7 @@ def parse_expr(tokens, options):
 
 
 def parse_seq(tokens, options):
+    """Function needs docstring"""
     """seq ::= ( atom [ '...' ] )* ;"""
     result = []
     while tokens.current() not in [None, ']', ')', '|']:
@@ -402,6 +425,7 @@ def parse_seq(tokens, options):
 
 
 def parse_atom(tokens, options):
+    """Function needs docstring"""
     """atom ::= '(' expr ')' | '[' expr ']' | 'options'
              | long | shorts | argument | command ;
     """
@@ -452,6 +476,7 @@ def parse_argv(tokens, options, options_first=False):
 
 
 def parse_defaults(doc):
+    """Function needs docstring"""
     # in python < 2.7 you can't pass flags=re.MULTILINE
     split = re.split('\n *(<\S+?>|-\S+?)', doc)[1:]
     split = [s1 + s2 for s1, s2 in zip(split[::2], split[1::2])]
@@ -462,6 +487,7 @@ def parse_defaults(doc):
 
 
 def printable_usage(doc):
+    """Function needs docstring"""
     # in python < 2.7 you can't pass flags=re.IGNORECASE
     usage_split = re.split(r'([Uu][Ss][Aa][Gg][Ee]:)', doc)
     if len(usage_split) < 3:
@@ -472,11 +498,13 @@ def printable_usage(doc):
 
 
 def formal_usage(printable_usage):
+    """Function needs docstring"""
     pu = printable_usage.split()[1:]  # split and drop "usage:"
     return '( ' + ' '.join(') | (' if s == pu[0] else s for s in pu[1:]) + ' )'
 
 
 def extras(help, version, options, doc):
+    """Function needs docstring"""
     if help and any((o.name in ('-h', '--help')) and o.value for o in options):
         print(doc.strip("\n"))
         sys.exit()
@@ -487,6 +515,7 @@ def extras(help, version, options, doc):
 
 class Dict(dict):
     def __repr__(self):
+        """Method needs docstring"""
         return '{%s}' % ',\n '.join('%r: %r' % i for i in sorted(self.items()))
 
 
