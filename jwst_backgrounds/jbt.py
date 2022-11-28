@@ -51,7 +51,7 @@ class background():
     '''
     def __init__(self, ra, dec, wavelength, thresh=1.1):
         # global attributes
-        self.cache_url = 'https://archive.stsci.edu/missions/jwst/simulations/straylight/sl_cache/'  # Path to the online location of the background cache
+        self.cache_url = 'https://archive.stsci.edu/missions/jwst/simulations/straylight/sl_cache_2.0/'  # Path to the online location of the background cache
         self.local_path = os.path.join(os.path.dirname(__file__), 'refdata')
         self.wave_file = 'std_spectrum_wavelengths.txt'  # The wavelength grid of the background cache
         self.thermal_file = 'thermal_curve_jwst_jrigby_v3.0.csv'  # The constant (not time variable) thermal self-emission curve
