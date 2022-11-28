@@ -19,12 +19,11 @@ setup(name='jwst_backgrounds',
       url='https://github.com/spacetelescope/jwst_background',
 
       # Author details
-      author='Space Telescope Science Institute',
+      author='Jane Rigby (GSFC) and Klaus Pontoppidan (STScI)',
+      author_email='Jane.Rigby@nasa.gov',
 
       # Choose your license
       license='BSD',
-      author='Jane Rigby (GSFC) and Klaus Pontoppidan (STScI)',
-      author_email='Jane.Rigby@nasa.gov',
       url='http://jwst.stsci.edu/',
       download_url = 'https://github.com/spacetelescope/jwst_backgrounds/',
       packages=['jwst_backgrounds'],
