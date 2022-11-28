@@ -11,7 +11,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 
 setup(name='jwst_backgrounds',
       version=__version__,
-      description='JWST Backgrounds',
+      description='Retrieve and plot JWST background information',
       long_description=long_description,
       long_description_content_type='text/markdown',
 
@@ -23,7 +23,6 @@ setup(name='jwst_backgrounds',
 
       # Choose your license
       license='BSD',
-      description='Retrieve and plot JWST background information',
       author='Jane Rigby (GSFC) and Klaus Pontoppidan (STScI)',
       author_email='Jane.Rigby@nasa.gov',
       url='http://jwst.stsci.edu/',
