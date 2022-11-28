@@ -24,7 +24,6 @@ setup(name='jwst_backgrounds',
 
       # Choose your license
       license='BSD',
-      url='http://jwst.stsci.edu/',
       download_url = 'https://github.com/spacetelescope/jwst_backgrounds/',
       packages=['jwst_backgrounds'],
       package_data={'jwst_backgrounds': ['refdata/*.csv','refdata/*.txt','agreement/*.pdf']},
