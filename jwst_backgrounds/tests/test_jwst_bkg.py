@@ -16,7 +16,7 @@ def test_myfile_from_healpix(ra, dec, expected):
 
     assert healpix_file == expected
 
-@pytest.mark.parametrize("wave, flux, new_wave, expected", [([1, 2.5, 3.4, 5.8, 6] [2, 4, 5.8, 4.3, 4], 5, np.array(4.8))])
+@pytest.mark.parametrize("wave, flux, new_wave, expected", [([1, 2.5, 3.4, 5.8, 6], [2, 4, 5.8, 4.3, 4], 5, np.array(4.8))])
 def test_interpolate_spec(wave, flux, new_wave, expected):
     bkg = background(82.82, -5.39, 2.15)
     result = bkg.interpolate_spec(wave, flux, new_wave)
