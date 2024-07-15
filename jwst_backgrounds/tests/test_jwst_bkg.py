@@ -9,7 +9,7 @@ from jwst_backgrounds.jbt import background
 
 TEST_DIR = abspath(join(dirname(__file__)))
 
-@pytest.mark.parametrize("ra, dec, expected", [(82.82, -5.39, "'1073/sl_pix_107381.bin'"), (10.68471, 41.26875, "'0330/sl_pix_033039.bin'")])
+@pytest.mark.parametrize("ra, dec, expected", [(82.82, -5.39, "1073/sl_pix_107381.bin"), (10.68471, 41.26875, "0330/sl_pix_033039.bin")])
 def test_myfile_from_healpix(ra, dec, expected):
     bkg = background(ra, dec, 2.15)
     healpix_file = bkg.myfile_from_healpix(ra, dec)
