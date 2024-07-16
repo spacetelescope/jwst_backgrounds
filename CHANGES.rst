@@ -1,12 +1,12 @@
 1.3.0
 =====
 
-- Updates for JWST cycle 3
+- Updates for JWST cycle 4
 - Added v4.0 of version file
 - CI/CD testing updates
 
-1.2.0
-=====
+1.2.0 (Nov 28, 2022)
+====================
 
 - Updates for JWST cycle 2
 - New thermal file.
