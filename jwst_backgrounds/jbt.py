@@ -134,16 +134,8 @@ class background():
         """
 
         # Read the background file via http
-        try:
-            # Python 3
-            # Read the background cache version
-            version_file = urllib.request.urlopen(self.cache_url + 'VERSION')
-            sbet_file = urllib.request.urlopen(self.cache_url + cache_file)
-        except:
-            # Python 2
-            # Read the background cache version
-            version_file = urllib.urlopen(self.cache_url + 'VERSION')
-            sbet_file = urllib.urlopen(self.cache_url + cache_file)
+        version_file = urllib.request.urlopen(self.cache_url + 'VERSION')
+        sbet_file = urllib.request.urlopen(self.cache_url + cache_file)
 
         self.cache_version = version_file.readlines()[0].decode('utf-8')[:-1]
         sbet_data = sbet_file.read()
@@ -313,7 +305,7 @@ class background():
             plt.title(annotation)
             plt.ylabel("bkg at " + str(bathtub['wavelength']) + " um (MJy/sr)", fontsize=12)
         else:
-            plt.ylabel("bkg (MJy/SR)", fontsize=fontsize)
+            plt.ylabel("bkg (MJy/SR)", fontsize=20)
 
         if showsubbkgs:
             plt.scatter(calendar, bathtub['zodi_thiswave'], s=20, label="Zodiacal")
