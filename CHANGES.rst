@@ -1,5 +1,6 @@
 1.3.0
 =====
+
 - Updates for JWST cycle 3
 - Added v4.0 of version file
 - CI/CD testing updates
