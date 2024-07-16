@@ -54,6 +54,10 @@ def test_backgrounds(thisday=100):
 
 @pytest.mark.parametrize("thisday", [100, -1])
 def test_get_background(thisday):
+    """By default, get_background does plotting and writing of files.
+    Although we aren't testing intermediate or outputs of get_background
+    it does check to make sure it will run to completion.
+    """
     get_background(261.6833333, -73.33222222, wavelength=2.15, thisday=thisday)
 
 
