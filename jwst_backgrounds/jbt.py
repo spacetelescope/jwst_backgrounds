@@ -166,7 +166,7 @@ class background():
         zodi_bg = np.zeros((Ndays, self.sl_nwave))
         stray_light_bg = np.zeros((Ndays, self.sl_nwave))
         perday = self.sl_nwave * 2
-        partB= struct.unpack(str((len(calendar)) * self.sl_nwave * 2) + 'd', sbet_data[perday * Ndays * -8:])
+        partB = struct.unpack(str((len(calendar)) * self.sl_nwave * 2) + 'd', sbet_data[perday * Ndays * -8:])
 
         # The index dd in zodi_bg[dd, : ] corresponds to the calendar day lookup[dd]
         for dd in range(0, int(Ndays)):
@@ -300,8 +300,14 @@ class background():
         plt.xlim(0, 366)
 
         if showannotate:
-            annotation = str(bathtub['good_days']) + " good days out of " + str(calendar.size) + \
-                         " days observable, for threshold " + str(self.thresh)
+            annotation = (
+                str(bathtub["good_days"])
+                + " good days out of "
+                + str(calendar.size)
+                + " days observable, for threshold "
+                + str(self.thresh)
+            )
+
             plt.title(annotation)
             plt.ylabel("bkg at " + str(bathtub['wavelength']) + " um (MJy/sr)", fontsize=12)
         else:

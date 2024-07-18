@@ -1,5 +1,5 @@
-1.3.0
-=====
+1.3.0 (July 18, 2024)
+=====================
 
 - Updates for JWST cycle 4
 - Added v4.0 of version file
