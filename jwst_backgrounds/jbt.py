@@ -54,7 +54,7 @@ class background():
         self.cache_url = 'https://archive.stsci.edu/missions/jwst/simulations/straylight/sl_cache_2.0/'  # Path to the online location of the background cache
         self.local_path = os.path.join(os.path.dirname(__file__), 'refdata')
         self.wave_file = 'std_spectrum_wavelengths.txt'  # The wavelength grid of the background cache
-        self.thermal_file = 'thermal_curve_jwst_jrigby_v3.0.csv'  # The constant (not time variable) thermal self-emission curve
+        self.thermal_file = 'thermal_curve_jwst_jrigby_v4.0.csv'  # The constant (not time variable) thermal self-emission curve
         self.nside = 128  # Healpy parameter, from generate_backgroundmodel_cache.c .
         self.wave_array, self.thermal_bg = self.read_static_data()
         self.sl_nwave = self.wave_array.size  # Size of wavelength array
@@ -134,16 +134,8 @@ class background():
         """
 
         # Read the background file via http
-        try:
-            # Python 3
-            # Read the background cache version
-            version_file = urllib.request.urlopen(self.cache_url + 'VERSION')
-            sbet_file = urllib.request.urlopen(self.cache_url + cache_file)
-        except:
-            # Python 2
-            # Read the background cache version
-            version_file = urllib.urlopen(self.cache_url + 'VERSION')
-            sbet_file = urllib.urlopen(self.cache_url + cache_file)
+        version_file = urllib.request.urlopen(self.cache_url + 'VERSION')
+        sbet_file = urllib.request.urlopen(self.cache_url + cache_file)
 
         self.cache_version = version_file.readlines()[0].decode('utf-8')[:-1]
         sbet_data = sbet_file.read()
@@ -174,7 +166,7 @@ class background():
         zodi_bg = np.zeros((Ndays, self.sl_nwave))
         stray_light_bg = np.zeros((Ndays, self.sl_nwave))
         perday = self.sl_nwave * 2
-        partB= struct.unpack(str((len(calendar)) * self.sl_nwave * 2) + 'd', sbet_data[perday * Ndays * -8:])
+        partB = struct.unpack(str((len(calendar)) * self.sl_nwave * 2) + 'd', sbet_data[perday * Ndays * -8:])
 
         # The index dd in zodi_bg[dd, : ] corresponds to the calendar day lookup[dd]
         for dd in range(0, int(Ndays)):
@@ -308,12 +300,18 @@ class background():
         plt.xlim(0, 366)
 
         if showannotate:
-            annotation = str(bathtub['good_days']) + " good days out of " + str(calendar.size) + \
-                         " days observable, for threshold " + str(self.thresh)
+            annotation = (
+                str(bathtub["good_days"])
+                + " good days out of "
+                + str(calendar.size)
+                + " days observable, for threshold "
+                + str(self.thresh)
+            )
+
             plt.title(annotation)
             plt.ylabel("bkg at " + str(bathtub['wavelength']) + " um (MJy/sr)", fontsize=12)
         else:
-            plt.ylabel("bkg (MJy/SR)", fontsize=fontsize)
+            plt.ylabel("bkg (MJy/SR)", fontsize=20)
 
         if showsubbkgs:
             plt.scatter(calendar, bathtub['zodi_thiswave'], s=20, label="Zodiacal")
