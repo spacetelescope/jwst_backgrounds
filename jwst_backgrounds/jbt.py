@@ -41,6 +41,11 @@ class background():
         the background threshold, relative to the minimum.  Default=1.1, which corresponds to <5% above the minimum background noise.
         Note that the actual noise difference will be even smaller, as there are often other significant sources of noise than just the
         background (source shot noise, detector noise, etc.).
+    mrs : bool
+        Should we return the background levels measured for MIRI MRS, or the (slightly higher) level measured for
+        MIRI Imager and other modes? This makes about a 20% difference for long wavelengths > 15 microns, and has
+        negligible effect at shorter wavelengths.
+
 
     Attributes
     ----------
@@ -49,12 +54,16 @@ class background():
     bathtub:
         Contains the (RA,DEC) background information as a function of calendar day, interpolated at wavelength
     '''
-    def __init__(self, ra, dec, wavelength, thresh=1.1):
+    def __init__(self, ra, dec, wavelength, thresh=1.1, mrs=False):
         # global attributes
         self.cache_url = 'https://archive.stsci.edu/missions/jwst/simulations/straylight/sl_cache_2.0/'  # Path to the online location of the background cache
         self.local_path = os.path.join(os.path.dirname(__file__), 'refdata')
         self.wave_file = 'std_spectrum_wavelengths.txt'  # The wavelength grid of the background cache
-        self.thermal_file = 'thermal_curve_jwst_jrigby_v4.0.csv'  # The constant (not time variable) thermal self-emission curve
+        # The constant (not time variable) thermal self-emission curve, of which there are 2 depending on mode.
+        self._thermal_file_mrs = 'thermal_curve_jwst_cycle6_mrs.csv'
+        self._thermal_file_mirim= 'thermal_curve_jwst_cycle6_ima.csv'
+        self.is_mrs = mrs
+        self.thermal_file = self._thermal_file_mrs if self.is_mrs else self._thermal_file_mirim
         self.nside = 128  # Healpy parameter, from generate_backgroundmodel_cache.c .
         self.wave_array, self.thermal_bg = self.read_static_data()
         self.sl_nwave = self.wave_array.size  # Size of wavelength array
